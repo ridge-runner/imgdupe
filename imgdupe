@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "Please provide an image filename as an argument."
+    exit 1
+fi
+
+filename="$1"
+basename="${filename%.*}"
+extension="${filename##*.}"
+
+# Define the desired output widths
+widths=(3840 3000 2400 2000 1920 1500 1280 1200 1000 800 640 500 400 320)
+
+# Loop through the widths and generate resized images
+for width in "${widths[@]}"; do
+    # Calculate the proportional height based on the aspect ratio
+    height=$(convert "$filename" -format "%[fx:int(round(${width}*h/w))]" info:)
+    output_filename="${basename}_${width}x${height}.${extension}"
+    convert "$filename" -resize "${width}x${height}" "$output_filename"
+    echo "Generated: $output_filename"
+done
